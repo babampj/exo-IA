@@ -1,0 +1,5 @@
+-- RÈGLEMENT ET INFOS NWS ( Normandie Web School ) --
+1. Horaires des cours : Du lundi au vendredi, de 90h00 à 17h00.
+2. Projets de fin d'année : Les rendus doivent être soumis avant le 15 juin à minuit sur la plateforme.
+3. Rendu du module IA : Il faut présenter une API Node.js/Express connectée à Gemini avec 4 phases (Chat, Contexte, Contexte enrichi, RAG).
+4. Contact du support : En cas de problème réseau, contacter support@nws.fr.

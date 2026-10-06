@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
 
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
@@ -14,30 +16,33 @@ const ai = new GoogleGenAI({ apiKey });
 app.use(express.json());
 app.use(express.static('public'));
 
-// Stockage des sessions
 const sessions = new Map();
 
-// Fonction pour construire le contexte enrichi
-function buildSystemInstruction(userName = 'Utilisateur') {
-  const currentDate = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+// --- ETAPE RAG : Chargement de la base de connaissances ---
+function getKnowledgeContext(userQuery) {
+  const filePath = path.join(process.cwd(), 'data', 'test.txt');
+  
+  if (!fs.existsSync(filePath)) {
+    return "";
+  }
+
+  const rawData = fs.readFileSync(filePath, 'utf-8');
+  const lines = rawData.split('\n').filter(line => line.trim() !== '');
+
+  // Recherche simple par mots-clés présents dans la question
+  const words = userQuery.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const relevantLines = lines.filter(line => 
+    words.some(word => line.toLowerCase().includes(word))
+  );
+
+  // Si aucun mot clé ne matche, on passe l'ensemble du fichier (si petit) ou un extrait
+  const contextToUse = relevantLines.length > 0 ? relevantLines.join('\n') : rawData;
 
   return `
-    Tu es "NWS-Bot", un assistant virtuel expert en développement informatique et pédagogie.
-    
-    CONSIGNES STRICTES :
-    - Tu t'adresses à l'utilisateur nommé "${userName}".
-    - Nous sommes le : ${currentDate}.
-    - Tes réponses doivent être structurées, claires et rédigées en Markdown.
-    - Utilise un ton professionnel mais dynamique et encourageant.
-    - Si l'utilisateur te demande la date ou l'heure, utilise l'information fournie ci-dessus.
-  `.trim();
+--- BASE DE CONNAISSANCES INTERNE ---
+${contextToUse}
+--- FIN DE LA BASE ---
+`;
 }
 
 app.get('/health', (req, res) => {
@@ -46,32 +51,42 @@ app.get('/health', (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, sessionId = 'default', userName = 'Alex' } = req.body;
+    const { message, sessionId = 'default' } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Le champ 'message' est obligatoire." });
     }
 
-    // Si la session n'existe pas encore, on la crée avec le CONTEXTE ENRICHI
-    if (!sessions.has(sessionId)) {
-      const systemInstruction = buildSystemInstruction(userName);
+    // RAG : Recherche des connaissances liées à la question
+    const knowledgeContext = getKnowledgeContext(message);
 
+    if (!sessions.has(sessionId)) {
       const chat = ai.chats.create({
         model: 'gemini-3.5-flash',
         config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.7, // Contrôle la créativité (0 = très strict, 1 = créatif)
+          systemInstruction: `
+            Tu es NWS-Bot, un assistant d'assistance.
+            Utilise PRIORITAIREMENT la base de connaissances fournie pour répondre aux questions.
+            Si la réponse se trouve dans la base de connaissances, réponds précisément d'après celle-ci.
+          `.trim(),
         },
       });
-
       sessions.set(sessionId, chat);
-      console.log(`[Session créée] ID: ${sessionId} pour ${userName}`);
     }
 
     const chatSession = sessions.get(sessionId);
 
+    // Injection du contexte RAG directement avec le message
+    const promptWithRag = `
+Contexte d'information disponible :
+${knowledgeContext}
+
+Question de l'utilisateur :
+${message}
+`.trim();
+
     const response = await chatSession.sendMessage({
-      message: message,
+      message: promptWithRag,
     });
 
     res.json({
@@ -79,14 +94,14 @@ app.post('/api/chat', async (req, res) => {
       reply: response.text,
     });
   } catch (error) {
-    console.error("Erreur Gemini :", error);
+    console.error("Erreur RAG Gemini :", error);
     res.status(500).json({
-      error: "Erreur lors de la génération de la réponse.",
+      error: "Erreur lors de la génération RAG.",
       details: error.message || String(error),
     });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Serveur démarré sur http://localhost:${PORT}`);
+  console.log(`Serveur démarré avec RAG sur http://localhost:${PORT}`);
 });
