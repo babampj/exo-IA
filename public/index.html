@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot R9</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .chat-container { width: 400px; height: 600px; background: #1e1e1e; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .header { padding: 16px; background: #2d2d2d; font-weight: bold; text-align: center; border-bottom: 1px solid #333; }
+    .messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; line-height: 1.4; word-break: break-word; }
+    .user { align-self: flex-end; background: #2563eb; color: white; }
+    .bot { align-self: flex-start; background: #333; color: #eee; }
+    .input-box { display: flex; padding: 12px; background: #2d2d2d; gap: 8px; }
+    input { flex: 1; padding: 10px; border-radius: 8px; border: none; background: #1e1e1e; color: white; outline: none; }
+    button { padding: 10px 16px; border-radius: 8px; border: none; background: #2563eb; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="header">Depitcho Chatbot</div>
+  <div class="messages" id="messages"></div>
+  <div class="input-box">
+    <input type="text" id="userInput" placeholder="Écris ton message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button onclick="sendMessage()">Envoyer</button>
+  </div>
+</div>
+
+<script>
+  const sessionId = "session_" + Math.random().toString(36).substring(2, 9);
+
+  async function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage(text, 'user');
+    input.value = '';
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, sessionId })
+      });
+      const data = await response.json();
+      appendMessage(data.reply || data.error, 'bot');
+    } catch (err) {
+      appendMessage("Erreur de connexion avec le serveur.", 'bot');
+    }
+  }
+
+  function appendMessage(text, sender) {
+    const box = document.getElementById('messages');
+    const msgEl = document.createElement('div');
+    msgEl.className = `msg ${sender}`;
+    msgEl.innerText = text;
+    box.appendChild(msgEl);
+    box.scrollTop = box.scrollHeight;
+  }
+</script>
+
+</body>
+</html>
