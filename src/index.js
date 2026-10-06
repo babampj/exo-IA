@@ -12,19 +12,26 @@ const ai = new GoogleGenAI({ apiKey });
 app.use(express.json());
 app.use(express.static('public'));
 
+const sessions = new Map();
+
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, sessionId = 'default' } = req.body;
     if (!message) return res.status(400).json({ error: "Message obligatoire" });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: message,
-    });
+    if (!sessions.has(sessionId)) {
+      const chat = ai.chats.create({
+        model: 'gemini-3.5-flash',
+      });
+      sessions.set(sessionId, chat);
+    }
 
-    res.json({ reply: response.text });
+    const chatSession = sessions.get(sessionId);
+    const response = await chatSession.sendMessage({ message });
+
+    res.json({ sessionId, reply: response.text });
   } catch (error) {
-    res.status(500).json({ error: "Erreur lors de la génération" });
+    res.status(500).json({ error: "Erreur lors de l'envoi" });
   }
 });
 
