@@ -1,5 +1,33 @@
--- RÈGLEMENT ET INFOS NWS ( Normandie Web School ) --
-1. Horaires des cours : Du lundi au vendredi, de 90h00 à 17h00.
-2. Projets de fin d'année : Les rendus doivent être soumis avant le 15 juin à minuit sur la plateforme.
-3. Rendu du module IA : Il faut présenter une API Node.js/Express connectée à Gemini avec 4 phases (Chat, Contexte, Contexte enrichi, RAG).
-4. Contact du support : En cas de problème réseau, contacter support@nws.fr.
+=== AGENCE WEB DEPITCHO - SERVICES, TARIFS ET HORAIRES ===
+
+--- HORAIRES D'OUVERTURE ET DISPONIBILITÉ ---
+- Plage horaire d'ouverture : Du lundi au vendredi, de 08h00 à 18h00.
+- Hors plage horaire (après 18h00, avant 08h00 ou les week-ends) : L'équipe est indisponible. Il faut inviter l'utilisateur à laisser son message et lui indiquer que nous lui répondrons le plus tôt possible.
+
+--- CATÉGORIES DE SITES WEB PROPOSÉS ---
+1. Site Vitrine
+2. Site E-commerce
+3. Application Web Sur Mesure
+4. Landings Pages & Portfolio
+
+--- DÉTAILS DES OFFRES ET TARIFS ---
+
+Catégorie : Site Vitrine
+- Description : Idéal pour présenter une activité, un artisan, une TPE/PME ou une profession libérale.
+- Prix : À partir de 500 € HT.
+- Ce qui est inclus : Jusqu'à 5 pages, design responsive, formulaire de contact, optimisation SEO de base.
+
+Catégorie : Site E-commerce
+- Description : Solution complète pour vendre vos produits en ligne.
+- Prix : À partir de 800 € HT.
+- Ce qui est inclus : Gestion du catalogue produits, paiement sécurisé (Stripe/PayPal), gestion des stocks et commandes.
+
+Catégorie : Application Web Sur Mesure
+- Description : Développement de plateformes complexes, espaces clients, SaaS ou outils métiers.
+- Prix : Sur devis (à partir de 1 000 € HT).
+- Ce qui est inclus : Architecture dédiée, API, espace d'administration personnalisé, fonctionnalités sur mesure.
+
+Catégorie : Landings Pages & Portfolio
+- Description : Page unique impactante pour une campagne publicitaire ou un créatif.
+- Prix : À partir de 600 € HT.
+- Ce qui est inclus : Design haute conversion, intégration d'outils d'analyse, formulaire de capture de leads.
